@@ -1,0 +1,28 @@
+* {
+  box-sizing: border-box;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+}
+
+.hospital {
+  border: 1px dashed gray;
+}
+
+.sector {
+  border: 1px dashed rgb(161, 160, 160);
+  padding: 16px;
+
+  ul {
+    display: flex;
+    gap: 16px;
+  }
+}
+
+.room {
+  border: 1px dashed rgb(203, 200, 200);
+  padding: 16px;
+}
