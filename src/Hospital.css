@@ -14,7 +14,7 @@ li {
 
 .sector {
   border: 1px dashed rgb(161, 160, 160);
-  padding: 16px;
+  /* padding: 16px; */
 
   ul {
     display: flex;
@@ -24,5 +24,6 @@ li {
 
 .room {
   border: 1px dashed rgb(203, 200, 200);
-  padding: 16px;
+  height: 100%;
+  /* padding: 16px; */
 }
