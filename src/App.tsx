@@ -1,4 +1,4 @@
-import { useDraggable } from "@dnd-kit/react";
+import { useDraggable, useDroppable } from "@dnd-kit/react";
 import "./App.css";
 
 interface Card {
@@ -13,12 +13,24 @@ const cards: Card[] = [
   { id: "4", title: "Card 4" },
 ];
 
+const dropZones = [
+  { id: "d1", title: "DropZone 1" },
+  { id: "d2", title: "DropZone 2" },
+  { id: "d3", title: "DropZone 3" },
+];
+
 export function App() {
   return (
     <>
       <ul className="cards-container">
         {cards.map((card) => (
           <Card key={card.id} card={card} />
+        ))}
+      </ul>
+
+      <ul className="cards-container">
+        {dropZones.map((dropzone) => (
+          <DropZone key={dropzone.id} dropZone={dropzone} />
         ))}
       </ul>
     </>
@@ -36,6 +48,22 @@ export function Card({ card }: { card: Card }) {
       <button className="drag-handle" ref={handleRef}>
         drag here
       </button>
+    </li>
+  );
+}
+
+export function DropZone({
+  dropZone,
+}: {
+  dropZone: { id: string; title: string };
+}) {
+  const { ref } = useDroppable({
+    id: dropZone.id,
+  });
+
+  return (
+    <li ref={ref} className="drop-zone">
+      <div>{dropZone.title}</div>
     </li>
   );
 }

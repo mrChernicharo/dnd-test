@@ -7,8 +7,10 @@ button {
 }
 
 .cards-container {
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
   padding: 16px;
 }
@@ -28,4 +30,16 @@ button {
   padding: 16px;
   border-radius: 8px;
   cursor: grab;
+}
+
+.drop-zone {
+  width: 100%;
+  height: 200px;
+  padding: 16px;
+  background-color: #524949;
+  color: #fee;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
