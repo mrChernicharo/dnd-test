@@ -26,13 +26,16 @@ export function App() {
 }
 
 export function Card({ card }: { card: Card }) {
-  const { ref } = useDraggable({
+  const { ref, handleRef } = useDraggable({
     id: card.id,
   });
 
   return (
     <li ref={ref} className="card">
-      {card.title}
+      <div>{card.title}</div>
+      <button className="drag-handle" ref={handleRef}>
+        drag here
+      </button>
     </li>
   );
 }
