@@ -1,7 +1,7 @@
 import {
   ReactGridLayout,
   useContainerWidth,
-  type GridLayoutProps,
+  // type GridLayoutProps,
   type LayoutItem,
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -53,6 +53,41 @@ const hospital = {
   ],
 };
 
+/****************************************************/
+/****************************************************/
+/****************************************************/
+
+// export function Hospital() {
+//   const { width, mounted, containerRef } = useContainerWidth({
+//     measureBeforeMount: true,
+//     // initialWidth: window.innerWidth,
+//   });
+
+//   const hospitalLayout = buildHospitalLayout(hospital.sectors, 1);
+
+//   return (
+//     <div className="hospital">
+//       <h1>{hospital.name}</h1>
+
+//       <div ref={containerRef}>
+//         {mounted && (
+//           <ReactGridLayout
+//             layout={hospitalLayout}
+//             width={width}
+//             gridConfig={{ cols: 1 }}
+//           >
+//             {hospitalLayout?.map((item) => (
+//               <div key={item.i}>
+//                 <Sector sector={item.sector} />
+//               </div>
+//             ))}
+//           </ReactGridLayout>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
 export function Hospital() {
   return (
     <div className="hospital">
@@ -102,6 +137,44 @@ export function Sector({ sector }: { sector: Sector }) {
 export function Room({ room }: { room: Room }) {
   return <div className="room">{room.name}</div>;
 }
+
+/****************************************************/
+/****************************************************/
+/****************************************************/
+
+// function buildHospitalLayout(
+//   sectors: Sector[],
+//   cols: number,
+//   width = 1,
+//   height = 1,
+// ) {
+//   const layout: (LayoutItem & { sector: Sector })[] = [];
+
+//   let y = 0;
+//   let x = 0;
+
+//   for (const sector of sectors) {
+//     const item: LayoutItem & { sector: Sector } = {
+//       i: sector.id,
+//       x,
+//       y,
+//       w: width,
+//       h: height,
+//       isResizable: false,
+//       isBounded: true,
+//       sector,
+//     };
+
+//     if (x + width >= cols) y++;
+//     x = (x + width) % cols;
+
+//     layout.push(item);
+//   }
+
+//   console.log("buildHospitalLayout :::", layout);
+
+//   return layout;
+// }
 
 function buildSectorLayout(rooms: Room[], cols: number, width = 3, height = 2) {
   const layout: (LayoutItem & { room: Room })[] = [];

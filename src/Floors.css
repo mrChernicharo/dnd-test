@@ -1,0 +1,32 @@
+.floors-root{
+    padding: 24px;
+}
+.floor-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.floor-header {
+  padding: 10px;
+  background: #333;
+  color: white;
+  cursor: default;
+}
+.floor-drag-handle {
+  cursor: grab;
+  margin-right: 10px;
+}
+.room-card {
+  background: #e0e0e0;
+  border: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.room-drag-handle {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  cursor: grab;
+  font-weight: bold;
+}
