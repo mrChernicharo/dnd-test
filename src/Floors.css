@@ -1,5 +1,5 @@
 .floors-root {
-  /* padding: 24px; */
+  padding: 24px;
 }
 .floor-container {
   height: 100%;
@@ -7,7 +7,7 @@
   flex-direction: column;
 }
 .floor-header {
-  /* padding: 10px; */
+  padding: 10px;
   background: #333;
   color: white;
   cursor: default;
