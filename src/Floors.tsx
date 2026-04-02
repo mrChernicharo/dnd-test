@@ -1,18 +1,16 @@
 import { useState } from "react";
-import { Responsive, WidthProvider } from "react-grid-layout/legacy";
-import "/node_modules/react-grid-layout/css/styles.css";
-import "/node_modules/react-resizable/css/styles.css";
+import { ResponsiveGridLayout, useContainerWidth } from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 import "./Floors.css";
 
-const ResponsiveGridLayout = WidthProvider(Responsive);
+import type { Layout, LayoutItem } from "react-grid-layout";
 
 // --- CONSTANTS ---
 const ROW_HEIGHT = 30;
 const FLOOR_PADDING = 2; // Extra grid units for floor headers/padding
 
 // --- CHILD COMPONENT: THE FLOOR ---
-
-import type { Layout, LayoutItem } from "react-grid-layout";
 
 interface FloorProps {
   id: string;
@@ -22,6 +20,8 @@ interface FloorProps {
 }
 
 const Floor = ({ id, rooms, onRoomsChange, updateFloorHeight }: FloorProps) => {
+  const { width, containerRef } = useContainerWidth();
+
   const handleLayoutChange = (newLayout: Layout) => {
     onRoomsChange(id, newLayout);
 
@@ -40,16 +40,15 @@ const Floor = ({ id, rooms, onRoomsChange, updateFloorHeight }: FloorProps) => {
       <div className="floor-header">
         <span className="floor-drag-handle">⠿</span> Floor: {id}
       </div>
-      <div className="floor-content">
+      <div className="floor-content" ref={containerRef}>
         <ResponsiveGridLayout
-          className="layout"
+          width={width}
           layouts={{ lg: rooms }}
           breakpoints={{ lg: 1200 }}
           cols={{ lg: 12 }}
           rowHeight={ROW_HEIGHT}
-          draggableHandle=".room-drag-handle" // Prevents floor from dragging when moving a room
+          dragConfig={{ handle: ".room-drag-handle" }}
           onLayoutChange={handleLayoutChange}
-          margin={[10, 10]}
         >
           {rooms.map((room: LayoutItem) => (
             <div key={room.i} className="room-card">
@@ -66,11 +65,13 @@ const Floor = ({ id, rooms, onRoomsChange, updateFloorHeight }: FloorProps) => {
 // --- MAIN APP ---
 
 interface FloorsState {
-  floors: LayoutItem[];
+  floors: Layout;
   rooms: Record<string, Layout>;
 }
 
 export default function Floors() {
+  const { width, containerRef } = useContainerWidth();
+
   const [layouts, setLayouts] = useState<FloorsState>({
     floors: [
       { i: "floor-1", x: 0, y: 0, w: 12, h: 8 },
@@ -93,9 +94,8 @@ export default function Floors() {
     }));
   };
 
-  // ResponsiveGridLayout's onLayoutChange: (layout: Layout, layouts: Partial<Record<string, Layout>>) => void
   const handleFloorLayoutChange = (layout: Layout) => {
-    setLayouts((prev) => ({ ...prev, floors: layout as LayoutItem[] }));
+    setLayouts((prev) => ({ ...prev, floors: layout }));
   };
 
   const handleRoomLayoutChange = (floorId: string, newRoomLayout: Layout) => {
@@ -106,17 +106,16 @@ export default function Floors() {
   };
 
   return (
-    <div className="floors-root">
+    <div className="floors-root" ref={containerRef}>
       <h1>Building Manager</h1>
       <ResponsiveGridLayout
-        className="layout"
+        width={width}
         layouts={{ lg: layouts.floors }}
         breakpoints={{ lg: 1200 }}
         cols={{ lg: 12 }}
         rowHeight={ROW_HEIGHT}
-        draggableHandle=".floor-drag-handle"
+        dragConfig={{ handle: ".floor-drag-handle" }}
         onLayoutChange={handleFloorLayoutChange}
-        margin={[0, 20]}
       >
         {layouts.floors.map((floor) => (
           <div
