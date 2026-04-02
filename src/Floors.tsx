@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
+import type { Layout, LayoutItem } from "react-grid-layout";
 import "/node_modules/react-grid-layout/css/styles.css";
 import "/node_modules/react-resizable/css/styles.css";
 import "./Floors.css";
@@ -7,12 +8,8 @@ import "./Floors.css";
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 // --- CONSTANTS ---
-const ROW_HEIGHT = 30;
+const ROW_HEIGHT = 20;
 const FLOOR_PADDING = 2; // Extra grid units for floor headers/padding
-
-// --- CHILD COMPONENT: THE FLOOR ---
-
-import type { Layout, LayoutItem } from "react-grid-layout";
 
 interface FloorProps {
   id: string;
@@ -20,50 +17,6 @@ interface FloorProps {
   onRoomsChange: (floorId: string, newLayout: Layout) => void;
   updateFloorHeight: (floorId: string, newH: number) => void;
 }
-
-const Floor = ({ id, rooms, onRoomsChange, updateFloorHeight }: FloorProps) => {
-  const handleLayoutChange = (newLayout: Layout) => {
-    onRoomsChange(id, newLayout);
-
-    // Calculate the "bottom-most" point of the rooms
-    const maxBottom = newLayout.reduce(
-      (max: number, item: LayoutItem) => Math.max(max, item.y + item.h),
-      0,
-    );
-
-    // Update the parent floor's height (Floor Height = Max Room Y+H + Padding)
-    updateFloorHeight(id, maxBottom + FLOOR_PADDING);
-  };
-
-  return (
-    <div className="floor-container">
-      <div className="floor-header">
-        <span className="floor-drag-handle">⠿</span> Floor: {id}
-      </div>
-      <div className="floor-content">
-        <ResponsiveGridLayout
-          className="layout"
-          layouts={{ lg: rooms }}
-          breakpoints={{ lg: 1200 }}
-          cols={{ lg: 12 }}
-          rowHeight={ROW_HEIGHT}
-          draggableHandle=".room-drag-handle" // Prevents floor from dragging when moving a room
-          onLayoutChange={handleLayoutChange}
-          margin={[10, 10]}
-        >
-          {rooms.map((room: LayoutItem) => (
-            <div key={room.i} className="room-card">
-              <div className="room-drag-handle">::</div>
-              Room {room.i}
-            </div>
-          ))}
-        </ResponsiveGridLayout>
-      </div>
-    </div>
-  );
-};
-
-// --- MAIN APP ---
 
 interface FloorsState {
   floors: LayoutItem[];
@@ -80,6 +33,8 @@ export default function Floors() {
       "floor-1": [
         { i: "1a", x: 0, y: 0, w: 4, h: 4 },
         { i: "1b", x: 4, y: 0, w: 4, h: 4 },
+        { i: "1c", x: 0, y: 2, w: 4, h: 4 },
+        { i: "1d", x: 7, y: 2, w: 4, h: 4 },
       ],
       "floor-2": [{ i: "2a", x: 0, y: 0, w: 6, h: 4 }],
     },
@@ -116,7 +71,8 @@ export default function Floors() {
         rowHeight={ROW_HEIGHT}
         draggableHandle=".floor-drag-handle"
         onLayoutChange={handleFloorLayoutChange}
-        margin={[0, 20]}
+        onResize={console.log}
+        // margin={[0, 20]}
       >
         {layouts.floors.map((floor) => (
           <div
@@ -139,3 +95,47 @@ export default function Floors() {
     </div>
   );
 }
+
+const Floor = ({ id, rooms, onRoomsChange, updateFloorHeight }: FloorProps) => {
+  const handleLayoutChange = (newLayout: Layout) => {
+    onRoomsChange(id, newLayout);
+
+    // Calculate the "bottom-most" point of the rooms
+    const maxBottom = newLayout.reduce(
+      (max: number, item: LayoutItem) => Math.max(max, item.y + item.h),
+      0,
+    );
+
+    console.log(`Floor ${id} new max bottom:`, maxBottom);
+
+    // Update the parent floor's height (Floor Height = Max Room Y+H + Padding)
+    updateFloorHeight(id, maxBottom + FLOOR_PADDING);
+  };
+
+  return (
+    <div className="floor-container">
+      <div className="floor-header">
+        <span className="floor-drag-handle">⠿</span> Floor: {id}
+      </div>
+      <div className="floor-content">
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={{ lg: rooms }}
+          breakpoints={{ lg: 1200 }}
+          cols={{ lg: 12 }}
+          rowHeight={ROW_HEIGHT}
+          draggableHandle=".room-drag-handle" // Prevents floor from dragging when moving a room
+          onLayoutChange={handleLayoutChange}
+          // margin={[10, 10]}
+        >
+          {rooms.map((room: LayoutItem) => (
+            <div key={room.i} className="room-card">
+              <div className="room-drag-handle">::</div>
+              Room {room.i}
+            </div>
+          ))}
+        </ResponsiveGridLayout>
+      </div>
+    </div>
+  );
+};
