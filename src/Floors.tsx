@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { ResponsiveGridLayout, useContainerWidth } from "react-grid-layout";
+import type { Layout, LayoutItem } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./Floors.css";
-
-import type { Layout, LayoutItem } from "react-grid-layout";
 
 const ROW_HEIGHT = 20;
 const FLOOR_PADDING = 2.25; // Extra grid units for floor headers/padding
