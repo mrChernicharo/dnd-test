@@ -5,6 +5,9 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./Floors.css";
 
+type Sector = { id: string; rooms: Room[] };
+type Room = { id: string; beds: number };
+
 export function FloorPlan() {
   const [hospital, sethospital] = useState({
     name: "Hospital Geral",
@@ -24,12 +27,31 @@ export function FloorPlan() {
         id: "s2",
         rooms: [
           { id: "r201", beds: 6 },
-          { id: "r202", beds: 15 },
-          { id: "r203", beds: 80 },
+          { id: "r202", beds: 80 },
+          { id: "r203", beds: 15 },
+          { id: "r204", beds: 1254 },
         ],
       },
     ],
   });
+
+  function addRoom(sector: Sector, room: Room) {
+    sethospital((prev) => {
+      return {
+        ...prev,
+        sectors: prev.sectors.map((sec) =>
+          sec.id !== sector.id
+            ? sec
+            : {
+                ...sector,
+                rooms: sector.rooms.map((r) =>
+                  r.id !== room.id ? r : { ...r, beds: r.beds + 1 },
+                ),
+              },
+        ),
+      };
+    });
+  }
 
   useEffect(() => {
     console.log("::::: hospital", hospital);
@@ -41,7 +63,7 @@ export function FloorPlan() {
 
       {hospital.sectors.map((sector) => (
         <div key={sector.id}>
-          <h2>{sector.id}</h2>
+          <h2 style={{ background: "red" }}>{sector.id}</h2>
 
           <div>
             {sector.rooms.map((room) => {
@@ -50,29 +72,7 @@ export function FloorPlan() {
               return (
                 <div key={room.id}>
                   <h3>Room {room.id}</h3>
-                  <button
-                    onClick={() => {
-                      sethospital((prev) => {
-                        return {
-                          ...prev,
-                          sectors: prev.sectors.map((sec) =>
-                            sec.id !== sector.id
-                              ? sec
-                              : {
-                                  ...sector,
-                                  rooms: sector.rooms.map((r) =>
-                                    r.id !== room.id
-                                      ? r
-                                      : { ...r, beds: r.beds + 1 },
-                                  ),
-                                },
-                          ),
-                        };
-                      });
-                    }}
-                  >
-                    +
-                  </button>
+                  <button onClick={() => addRoom(sector, room)}>+</button>
 
                   <div
                     style={{
@@ -97,7 +97,7 @@ export function FloorPlan() {
                           }}
                           key={`${room.id}-${i + 1}`}
                         >
-                          <div>bed {i + 1}</div>
+                          <span>{i + 1}</span>
                         </div>
                       ))}
                   </div>
@@ -112,13 +112,17 @@ export function FloorPlan() {
 }
 
 // [rows, cols]
-function getBedsGrid(beds: number): [number, number] {
+function getBedsGrid(beds: number, maxCols = 24): [number, number] {
   const sqrt = Math.sqrt(beds);
-  const sqrtFloor = Math.trunc(sqrt);
+  const sqrtFloor = Math.floor(sqrt);
+  const sqrtCeil = Math.ceil(sqrt);
 
-  if (sqrtFloor === sqrt) return [sqrt, sqrt];
+  if (maxCols > 0 && sqrtCeil > maxCols) {
+    return [Math.ceil(beds / maxCols), maxCols];
+  }
 
-  const sqrtCeil = sqrtFloor + 1;
+  if (sqrtFloor === sqrtCeil) return [sqrt, sqrt];
+
   const diff = sqrt - sqrtFloor;
 
   if (diff > 0.5) return [sqrtCeil, sqrtCeil];
