@@ -8,32 +8,34 @@ import "./Floors.css";
 type Sector = { id: string; rooms: Room[] };
 type Room = { id: string; beds: number };
 
+const initialHospital = {
+  name: "Hospital Geral",
+  sectors: [
+    {
+      id: "s1",
+      rooms: [
+        { id: "r101", beds: 2 },
+        { id: "r102", beds: 4 },
+        { id: "r103", beds: 6 },
+        { id: "r104", beds: 3 },
+        { id: "r105", beds: 1 },
+        { id: "r106", beds: 10 },
+      ],
+    },
+    {
+      id: "s2",
+      rooms: [
+        { id: "r201", beds: 6 },
+        { id: "r202", beds: 80 },
+        { id: "r203", beds: 15 },
+        { id: "r204", beds: 1254 },
+      ],
+    },
+  ],
+};
+
 export function FloorPlan() {
-  const [hospital, sethospital] = useState({
-    name: "Hospital Geral",
-    sectors: [
-      {
-        id: "s1",
-        rooms: [
-          { id: "r101", beds: 2 },
-          { id: "r102", beds: 4 },
-          { id: "r103", beds: 6 },
-          { id: "r104", beds: 3 },
-          { id: "r105", beds: 1 },
-          { id: "r106", beds: 10 },
-        ],
-      },
-      {
-        id: "s2",
-        rooms: [
-          { id: "r201", beds: 6 },
-          { id: "r202", beds: 80 },
-          { id: "r203", beds: 15 },
-          { id: "r204", beds: 1254 },
-        ],
-      },
-    ],
-  });
+  const [hospital, sethospital] = useState(initialHospital);
 
   function addRoom(sector: Sector, room: Room) {
     sethospital((prev) => {
@@ -61,11 +63,49 @@ export function FloorPlan() {
     <div>
       <h1>{hospital.name}</h1>
 
-      {hospital.sectors.map((sector) => (
-        <div key={sector.id}>
-          <h2 style={{ background: "red" }}>{sector.id}</h2>
+      <Sectors sectors={hospital.sectors} addRoom={addRoom} />
+    </div>
+  );
+}
 
-          <div>
+interface SectorProps {
+  sectors: Sector[];
+  addRoom: (sector: Sector, room: Room) => void;
+}
+
+export function Sectors({ sectors, addRoom }: SectorProps) {
+  return (
+    <>
+      {sectors.map((sector) => (
+        <div key={sector.id}>
+          <div
+            style={{
+              position: "relative",
+              padding: 16,
+              background: "white",
+            }}
+          >
+            <h2 style={{ background: "red" }}>{sector.id}</h2>
+            <div
+              style={{
+                position: "absolute",
+                right: 0,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              🀆
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "black",
+              margin: 16,
+              padding: 16,
+              border: "2px dotted",
+            }}
+          >
             {sector.rooms.map((room) => {
               const [rows, cols] = getBedsGrid(room.beds);
 
@@ -87,18 +127,7 @@ export function FloorPlan() {
                     {Array(room.beds)
                       .fill(0)
                       .map((_, i) => (
-                        <div
-                          style={{
-                            height: 48,
-                            border: "1px solid",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                          key={`${room.id}-${i + 1}`}
-                        >
-                          <span>{i + 1}</span>
-                        </div>
+                        <Room room={room} i={i} />
                       ))}
                   </div>
                 </div>
@@ -107,6 +136,23 @@ export function FloorPlan() {
           </div>
         </div>
       ))}
+    </>
+  );
+}
+
+export function Room({ room, i }: { room: Room; i: number }) {
+  return (
+    <div
+      style={{
+        height: 48,
+        border: "1px solid",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+      key={`${room.id}-${i + 1}`}
+    >
+      <span>{i + 1}</span>
     </div>
   );
 }
