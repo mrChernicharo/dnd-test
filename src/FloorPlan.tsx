@@ -8,6 +8,11 @@ import "./Floors.css";
 type Sector = { id: string; rooms: Room[] };
 type Room = { id: string; beds: number };
 
+interface SectorProps {
+  sector: Sector;
+  addBed: (sector: Sector, room: Room) => void;
+}
+
 const initialHospital = {
   name: "Hospital Geral",
   sectors: [
@@ -37,7 +42,7 @@ const initialHospital = {
 export function FloorPlan() {
   const [hospital, sethospital] = useState(initialHospital);
 
-  function addRoom(sector: Sector, room: Room) {
+  function addBed(sector: Sector, room: Room) {
     sethospital((prev) => {
       return {
         ...prev,
@@ -63,88 +68,108 @@ export function FloorPlan() {
     <div>
       <h1>{hospital.name}</h1>
 
-      <Sectors sectors={hospital.sectors} addRoom={addRoom} />
+      <>
+        {hospital.sectors.map((sector) => (
+          <Sector key={sector.id} sector={sector} addBed={addBed} />
+        ))}
+      </>
     </div>
   );
 }
 
-interface SectorProps {
-  sectors: Sector[];
-  addRoom: (sector: Sector, room: Room) => void;
+export function Sector({ sector, addBed }: SectorProps) {
+  return (
+    <div key={sector.id}>
+      <div
+        style={{
+          position: "relative",
+          padding: 16,
+          background: "red",
+        }}
+      >
+        <h2>{sector.id}</h2>
+        {/* drag handle */}
+        <div
+          className="sector-drag-handle"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+          }}
+        >
+          🀆
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: "darkblue",
+          margin: 16,
+          padding: 16,
+        }}
+      >
+        {sector.rooms.map((room) => {
+          return (
+            <Room
+              key={room.id}
+              room={room}
+              addAddBed={() => {
+                addBed(sector, room);
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
-export function Sectors({ sectors, addRoom }: SectorProps) {
+export function Room({
+  room,
+  addAddBed,
+}: {
+  room: Room;
+  addAddBed: () => void;
+}) {
+  const [rows, cols] = getBedsGrid(room.beds, 12);
+
   return (
     <>
-      {sectors.map((sector) => (
-        <div key={sector.id}>
-          <div
-            style={{
-              position: "relative",
-              padding: 16,
-              background: "white",
-            }}
-          >
-            <h2 style={{ background: "red" }}>{sector.id}</h2>
-            <div
-              style={{
-                position: "absolute",
-                right: 0,
-                top: "50%",
-                transform: "translateY(-50%)",
-              }}
-            >
-              🀆
-            </div>
-          </div>
-
-          <div
-            style={{
-              background: "black",
-              margin: 16,
-              padding: 16,
-              border: "2px dotted",
-            }}
-          >
-            {sector.rooms.map((room) => {
-              const [rows, cols] = getBedsGrid(room.beds);
-
-              return (
-                <div key={room.id}>
-                  <h3>Room {room.id}</h3>
-                  <button onClick={() => addRoom(sector, room)}>+</button>
-
-                  <div
-                    style={{
-                      border: "1px dashed",
-                      display: "grid",
-                      gap: 8,
-                      padding: 16,
-                      gridTemplateRows: `repeat(${rows}, 1fr)`,
-                      gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                    }}
-                  >
-                    {Array(room.beds)
-                      .fill(0)
-                      .map((_, i) => (
-                        <Room room={room} i={i} />
-                      ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      <div key={room.id} style={{ width: cols * 100, border: "2px dotted" }}>
+        <div style={{ textAlign: "left" }}>
+          <h3>Room {room.id}</h3>
+          <button onClick={addAddBed}>+</button>
         </div>
-      ))}
+        <div
+          style={{
+            border: "1px dashed",
+            display: "grid",
+            // gap: 8,
+            // padding: 16,
+            // width: cols * 100,
+            // height: rows * 16,
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          }}
+        >
+          {Array(room.beds)
+            .fill(0)
+            .map((_, i) => (
+              <Bed room={room} i={i} />
+            ))}
+        </div>
+      </div>
     </>
   );
 }
 
-export function Room({ room, i }: { room: Room; i: number }) {
+export function Bed({ room, i }: { room: Room; i: number }) {
   return (
     <div
       style={{
-        height: 48,
+        // height: 48,
+        // width: 200,
         border: "1px solid",
         display: "flex",
         justifyContent: "center",
@@ -152,7 +177,7 @@ export function Room({ room, i }: { room: Room; i: number }) {
       }}
       key={`${room.id}-${i + 1}`}
     >
-      <span>{i + 1}</span>
+      <span>bed {i + 1}</span>
     </div>
   );
 }
