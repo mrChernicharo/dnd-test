@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
-import { ResponsiveGridLayout, useContainerWidth } from "react-grid-layout";
-import type { Layout, LayoutItem } from "react-grid-layout";
+import {
+  // useEffect,
+  useState,
+} from "react";
+import {
+  ReactGridLayout,
+  // ResponsiveGridLayout,
+  useContainerWidth,
+  type LayoutItem,
+} from "react-grid-layout";
+// import type { Layout, LayoutItem } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./Floors.css";
@@ -24,22 +32,23 @@ const initialHospital = {
         { id: "r103", beds: 6 },
         { id: "r104", beds: 3 },
         { id: "r105", beds: 1 },
-        { id: "r106", beds: 10 },
+        // { id: "r106", beds: 10 },
       ],
     },
     {
       id: "s2",
       rooms: [
         { id: "r201", beds: 6 },
-        { id: "r202", beds: 80 },
+        // { id: "r202", beds: 80 },
         { id: "r203", beds: 15 },
-        { id: "r204", beds: 1254 },
+        // { id: "r204", beds: 1254 },
       ],
     },
   ],
 };
 
 export function FloorPlan() {
+  const { width, containerRef, mounted } = useContainerWidth();
   const [hospital, sethospital] = useState(initialHospital);
 
   function addBed(sector: Sector, room: Room) {
@@ -60,19 +69,51 @@ export function FloorPlan() {
     });
   }
 
-  useEffect(() => {
-    console.log("::::: hospital", hospital);
-  }, [hospital]);
+  // useEffect(() => {
+  //   console.log("::::: hospital", hospital);
+  // }, [hospital]);
+
+  const sl = hospital.sectors.map((sector, i) => {
+    const layoutItem: LayoutItem = {
+      i: sector.id,
+      h: sector.rooms.reduce((acc, room) => {
+        const headingRows = 3;
+        const roomRows = getBedsGrid(room.beds)[0];
+        acc += roomRows + headingRows;
+        return acc;
+      }, 0),
+      w: 12,
+      x: 0,
+      y: sector.rooms.length * i,
+      isBounded: true,
+    };
+
+    return layoutItem;
+  });
+
+  console.log(sl, width);
 
   return (
-    <div>
+    <div style={{ margin: 16 }}>
       <h1>{hospital.name}</h1>
 
-      <>
-        {hospital.sectors.map((sector) => (
-          <Sector key={sector.id} sector={sector} addBed={addBed} />
-        ))}
-      </>
+      <div ref={containerRef}>
+        {mounted && (
+          <ReactGridLayout
+            layout={sl}
+            width={width}
+            gridConfig={{ cols: 12, rowHeight: 24 }}
+            // dragConfig={{ handle: ".sector-drag-handle" }}
+            onLayoutChange={(ev) => console.log(ev)}
+          >
+            {sl?.map((item, i) => (
+              <div key={item.i}>
+                <Sector sector={hospital.sectors[i]} addBed={addBed} />
+              </div>
+            ))}
+          </ReactGridLayout>
+        )}
+      </div>
     </div>
   );
 }
@@ -80,7 +121,7 @@ export function FloorPlan() {
 export function Sector({ sector, addBed }: SectorProps) {
   return (
     <div key={sector.id}>
-      <div
+      {/* <div
         style={{
           position: "relative",
           padding: 16,
@@ -88,8 +129,7 @@ export function Sector({ sector, addBed }: SectorProps) {
         }}
       >
         <h2>{sector.id}</h2>
-        {/* drag handle */}
-        <div
+        <button
           className="sector-drag-handle"
           style={{
             position: "absolute",
@@ -99,14 +139,15 @@ export function Sector({ sector, addBed }: SectorProps) {
           }}
         >
           🀆
-        </div>
-      </div>
+        </button>
+      </div> */}
 
       <div
         style={{
           background: "darkblue",
           margin: 16,
           padding: 16,
+          cursor: "grab",
         }}
       >
         {sector.rooms.map((room) => {
@@ -156,7 +197,7 @@ export function Room({
           {Array(room.beds)
             .fill(0)
             .map((_, i) => (
-              <Bed room={room} i={i} />
+              <Bed key={`${room.id}-${i}`} room={room} i={i} />
             ))}
         </div>
       </div>
