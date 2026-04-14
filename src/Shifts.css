@@ -1,0 +1,39 @@
+.root-container {
+  border: 1px solid lightgreen;
+  padding: 16px;
+  display: flex;
+}
+
+.professionals-container {
+  border: 1px solid orange;
+  padding: 16px;
+  width: 600px;
+  height: 800px;
+}
+
+.professional-card {
+  border: 1px solid gray;
+  padding: 8px 16px;
+  user-select: none;
+  background-color: #222;
+  width: 100%;
+}
+
+.slots-container {
+  border: 1px solid lightcoral;
+  padding: 16px;
+  display: flex;
+  width: 100%;
+  height: 160px;
+}
+
+.slot-container {
+  border: 1px solid lightblue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}

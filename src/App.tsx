@@ -4,11 +4,13 @@
 import Floors from "./Floors";
 import { FloorPlan } from "./FloorPlan";
 import { Hospital } from "./Hospital";
+import { Shifts } from "./Shifts";
 
 export function App() {
   // return <DnDKit01 />;
   // return <GridLayout />;
   // return <Hospital />;
   // return <Floors />;
-  return <FloorPlan />;
+  // return <FloorPlan />;
+  return <Shifts />;
 }
