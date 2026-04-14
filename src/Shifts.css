@@ -19,6 +19,16 @@
   width: 100%;
 }
 
+.bands-container {
+  border: 1px solid lightseagreen;
+  width: 100%;
+  padding: 16px;
+}
+
+.band-container {
+  border: 1px solid lightskyblue;
+}
+
 .slots-container {
   border: 1px solid lightcoral;
   padding: 16px;
@@ -34,7 +44,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   user-select: none;
   padding: 16px;
 }
