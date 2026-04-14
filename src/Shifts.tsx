@@ -14,68 +14,90 @@ const professionals = [
   { id: "prof-02", name: "Jandira Sales" },
   { id: "prof-03", name: "Roberto Menescau" },
   { id: "prof-04", name: "Rejane França" },
-  { id: "prof-05", name: "Amaranta Freitas" },
-];
+  { id: "prof-05", name: "Amaranta de Castro" },
+  { id: "prof-06", name: "Bob Fernandes" },
+].sort((a, b) => a.name.localeCompare(b.name));
+
+const initalCombinations = slots.reduce(
+  (acc, slot) => ({ ...acc, [slot.id]: "" }),
+  {},
+);
 
 // const rootWidth = 1800;
 
 export function Shifts() {
-  const [combinations, setCombinations] = useState<Record<string, string>>(
-    slots.reduce((acc, slot) => ({ ...acc, [slot.id]: "" }), {}),
-  );
+  const [combinations, setCombinations] =
+    useState<Record<string, string>>(initalCombinations);
 
   useEffect(() => {
-    console.log(
-      combinations,
-      Object.keys(combinations),
-      Object.values(combinations),
-    );
+    console.log(combinations);
   }, [combinations]);
 
   function onDragEnd(ev: any) {
     if (ev.canceled) return;
 
-    console.log(ev.operation);
+    const dragProfId = ev.operation.source?.id;
+    const dropSlotId = ev.operation.target?.id;
 
-    const profId = ev.operation.source?.id;
-    const slotId = ev.operation.target?.id;
+    setCombinations((prev) => {
+      const clone = { ...prev };
 
-    if (slotId && profId) {
-      console.log(`IT'S A MATCH! Dropped ${profId} onto ${slotId}`);
+      if (dropSlotId) {
+        const allocatedProf = clone[dropSlotId];
 
-      setCombinations((prev) => {
-        const clone = { ...prev };
-
-        if (clone[slotId]) {
-          console.log("There is already someone there!", clone[slotId]);
-        }
-
-        for (const [s, p] of Object.entries(clone)) {
-          if (s === slotId) {
-            clone[s] = profId;
+        if (allocatedProf) {
+          if (allocatedProf === dragProfId) {
+            console.log("Dropped back where it was before");
           } else {
-            if (p === profId) {
-              clone[s] = "";
+            let originalSlot;
+            for (const [s, p] of Object.entries(clone)) {
+              if (p === dragProfId) {
+                originalSlot = s;
+                break;
+              }
+            }
+
+            if (originalSlot) {
+              console.log("Swap professionals");
+              clone[originalSlot] = allocatedProf;
+              clone[dropSlotId] = dragProfId;
+            } else {
+              console.log("replace item, put prev back in the list");
+              clone[dropSlotId] = dragProfId;
+            }
+          }
+        } else {
+          console.log("Allocate to slot");
+
+          for (const [s, p] of Object.entries(clone)) {
+            if (s === dropSlotId) {
+              clone[s] = dragProfId;
+            } else {
+              if (p === dragProfId) {
+                clone[s] = "";
+              }
             }
           }
         }
-        return clone;
-      });
-    } else if (profId) {
-      console.log(`Dropped ${profId} outside`);
-
-      setCombinations((prev) => {
-        const clone = { ...prev };
-
+      } else {
+        let isDeallocation = false;
         for (const [s, p] of Object.entries(clone)) {
-          if (p === profId) {
+          if (p === dragProfId) {
+            isDeallocation = true;
             clone[s] = "";
+            break;
           }
         }
 
-        return clone;
-      });
-    }
+        if (isDeallocation) {
+          console.log(`De-Allocate item`);
+        } else {
+          console.log("no op");
+        }
+      }
+
+      return clone;
+    });
   }
 
   return (
@@ -95,18 +117,18 @@ export function Shifts() {
           </div>
 
           <div className="slots-container">
-            {slots.map((slot) => (
-              <Slot slot={slot} key={slot.id}>
-                {combinations[slot.id] ? (
-                  <ProfessionalCard
-                    key={combinations[slot.id]}
-                    professionalId={combinations[slot.id]}
-                  />
-                ) : (
-                  <Fragment key={slot.id} />
-                )}
-              </Slot>
-            ))}
+            {slots.map((slot) => {
+              const profId = combinations[slot.id];
+              return (
+                <Slot slot={slot} key={slot.id}>
+                  {profId ? (
+                    <ProfessionalCard key={profId} professionalId={profId} />
+                  ) : (
+                    <Fragment key={slot.id} />
+                  )}
+                </Slot>
+              );
+            })}
           </div>
         </div>
       </DragDropProvider>
