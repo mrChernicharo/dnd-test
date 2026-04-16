@@ -9,6 +9,13 @@ const slots = [
   { id: "slot-03", start: 60 * 16, end: 60 * 24 },
 ];
 
+const slots2 = [
+  { id: "slot2-01", start: 0, end: 60 * 8 },
+  { id: "slot2-02", start: 60 * 8, end: 60 * 16 },
+  { id: "slot2-03", start: 60 * 16, end: 60 * 24 },
+  { id: "slot2-04", start: 60 * 16, end: 60 * 24 },
+];
+
 const professionals = [
   { id: "prof-01", name: "Tomaz Renato" },
   { id: "prof-02", name: "Jandira Sales" },
@@ -18,7 +25,7 @@ const professionals = [
   { id: "prof-06", name: "Bob Fernandes" },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
-const initalCombinations = slots.reduce(
+const initalCombinations = [...slots, ...slots2].reduce(
   (acc, slot) => ({ ...acc, [slot.id]: "" }),
   {},
 );
@@ -101,7 +108,7 @@ export function Shifts() {
   }
 
   return (
-    <div>
+    <div className="shifts">
       <h1>Shifts</h1>
 
       <DragDropProvider onDragEnd={onDragEnd}>
@@ -116,19 +123,36 @@ export function Shifts() {
             )}
           </div>
 
-          <div className="slots-container">
-            {slots.map((slot) => {
-              const profId = combinations[slot.id];
-              return (
-                <Slot slot={slot} key={slot.id}>
-                  {profId ? (
-                    <ProfessionalCard key={profId} professionalId={profId} />
-                  ) : (
-                    <Fragment key={slot.id} />
-                  )}
-                </Slot>
-              );
-            })}
+          <div className="slots-root">
+            <div className="slots-container">
+              {slots.map((slot) => {
+                const profId = combinations[slot.id];
+                return (
+                  <Slot slot={slot} key={slot.id}>
+                    {profId ? (
+                      <ProfessionalCard key={profId} professionalId={profId} />
+                    ) : (
+                      <Fragment key={slot.id} />
+                    )}
+                  </Slot>
+                );
+              })}
+            </div>
+
+            <div className="slots-container">
+              {slots2.map((slot) => {
+                const profId = combinations[slot.id];
+                return (
+                  <Slot slot={slot} key={slot.id}>
+                    {profId ? (
+                      <ProfessionalCard key={profId} professionalId={profId} />
+                    ) : (
+                      <Fragment key={slot.id} />
+                    )}
+                  </Slot>
+                );
+              })}
+            </div>
           </div>
         </div>
       </DragDropProvider>

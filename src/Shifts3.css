@@ -1,0 +1,166 @@
+@scope (.shifts-3) {
+  --header-height: 40px;
+
+  * {
+    font-size: 12px;
+  }
+
+  header {
+    border: 1px solid lightgray;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 16px;
+    height: var(--header-height);
+
+    button {
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 24px;
+    }
+  }
+
+  .root-container {
+    border: 1px solid dodgerblue;
+    /* padding: 16px; */
+    display: flex;
+    flex-direction: row;
+
+    height: calc(100vh - var(--header-height));
+  }
+
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    height: 100%;
+    /* height: calc(100vh - var(--header-height)); */
+  }
+
+  .professionals-container {
+    border: 1px solid pink;
+    padding: 16px;
+  }
+
+  .professionals-container.desktop {
+    display: block;
+  }
+  .professionals-container.mobile {
+    display: none;
+  }
+
+  .professional-card {
+    border: 1px solid gray;
+    padding: 8px 16px;
+    user-select: none;
+    background-color: #222;
+    width: 100%;
+    text-align: start;
+  }
+
+  .slots-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.1);
+    /* border: 1px solid lightcyan;
+    
+    padding: 16px;
+    display: flex;
+    flex-direction: column; */
+  }
+
+  .day-boxes-container {
+    /* border: 1px solid lightcyan; */
+    width: 100%;
+    /* padding: 16px; */
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+
+    &.day {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &.week {
+      display: flex;
+      flex-direction: row;
+    }
+
+    &.month {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+  }
+
+  .time-ruler {
+    /* border: 1px dashed red; */
+    position: relative;
+    width: 100%;
+    height: 12px;
+  }
+
+  .tick {
+    position: absolute;
+    width: 1px;
+    height: 6px;
+    background-color: #444;
+
+    span {
+      display: block;
+      font-size: 7px;
+      transform: translate(-50%, -8px);
+    }
+  }
+
+  .day-boxes-inner {
+    width: 100%;
+  }
+
+  .day-box {
+    width: 100%;
+    height: 100%;
+    border-bottom: 1px solid #444;
+    border-right: 1px solid #444;
+    min-height: 120px;
+
+    &.left-side {
+      border-left: 1px solid #444;
+    }
+  }
+
+  @media screen and (width <= 768px) {
+    .root-container {
+      flex-direction: column;
+    }
+
+    .professionals-container {
+      width: 100%;
+    }
+
+    .professionals-container.desktop {
+      display: none;
+    }
+    .professionals-container.mobile {
+      display: block;
+    }
+  }
+
+  /*****/
+
+  .flex {
+    display: flex;
+  }
+
+  .flex-col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .justify-between {
+    justify-content: space-between;
+  }
+}

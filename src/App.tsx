@@ -5,6 +5,8 @@ import Floors from "./Floors";
 import { FloorPlan } from "./FloorPlan";
 import { Hospital } from "./Hospital";
 import { Shifts } from "./Shifts";
+import { Shifts2 } from "./Shifts2";
+import { Shifts3 } from "./Shifts3";
 
 export function App() {
   // return <DnDKit01 />;
@@ -12,5 +14,12 @@ export function App() {
   // return <Hospital />;
   // return <Floors />;
   // return <FloorPlan />;
-  return <Shifts />;
+  return (
+    <>
+      {/* <FloorPlan /> */}
+      {/* <Shifts /> */}
+      {/* <Shifts2 /> */}
+      <Shifts3 />
+    </>
+  );
 }
