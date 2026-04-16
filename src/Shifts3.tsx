@@ -9,7 +9,6 @@ import {
   localeFormat,
   professionals,
   shiftBlueprints,
-  sidebarSize,
   weekStartsOn,
   type ShiftBlueprint,
   type Slot,
@@ -159,7 +158,7 @@ export function Shifts3() {
       <div className="root-container">
         <div
           className="professionals-container desktop"
-          style={{ width: sidebarOpen ? sidebarSize.desktop.open : sidebarSize.desktop.closed }}
+          style={{ width: sidebarOpen ? "var(--sidebar-width-open)" : "var(--sidebar-width-closed)" }}
         >
           <div className="flex justify-between">
             {sidebarOpen && <div>Professionals</div>}
@@ -190,12 +189,22 @@ export function Shifts3() {
             ))}
           </div>
 
-          <div className="slots-container"></div>
+          <div
+            className="slots-container"
+            style={
+              {
+                "--slots-container-width": `calc(100% - ${sidebarOpen ? `var(--sidebar-width-open)` : `var(--sidebar-width-closed)`})`,
+              } as React.CSSProperties
+            }
+          ></div>
         </div>
 
         <div
           className="professionals-container mobile"
-          style={{ height: sidebarOpen ? sidebarSize.mobile.open : sidebarSize.mobile.closed }}
+          style={{
+            height: sidebarOpen ? "var(--mobile-bottom-height-open)" : "var(--mobile-bottom-height-closed)",
+            width: "100%",
+          }}
         >
           <div className="flex justify-between">
             <div>Professionals</div>

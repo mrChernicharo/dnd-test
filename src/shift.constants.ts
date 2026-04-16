@@ -42,10 +42,10 @@ export type DayBox = {
 export const weekStartsOn = 0; // 0 - sun, 1 - mon, 3 - tue, ...
 export const margin = 16;
 
-export const sidebarSize = {
-  desktop: { open: 320, closed: 60 },
-  mobile: { open: 400, closed: 60 },
-};
+// export const sidebarSize = {
+//   desktop: { open: 320, closed: 60 },
+//   mobile: { open: 400, closed: 60 },
+// };
 
 export const professionals: Professional[] = [
   { id: "p1", name: "Alice O'Connor", profession: "doctor" },
