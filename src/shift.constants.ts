@@ -242,12 +242,15 @@ export function buildSlotsBand(
           end: add(endOfWeek(slotStart), { seconds: 1 }),
           isPartial: true,
         });
-        slots.push({
-          id: `${id}-end`,
-          start: startOfWeek(slotEnd),
-          end: slotEnd,
-          isPartial: true,
-        });
+
+        if (isBefore(slotEnd, calendarEndDate)) {
+          slots.push({
+            id: `${id}-end`,
+            start: startOfWeek(slotEnd),
+            end: slotEnd,
+            isPartial: true,
+          });
+        }
       }
 
       slotStart = slotEnd;

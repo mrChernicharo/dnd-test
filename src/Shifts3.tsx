@@ -110,7 +110,7 @@ export function Shifts3() {
     })),
   }));
 
-  // console.log({ slots });
+  console.log({ shifts });
 
   return (
     <div className="shifts-3">
@@ -164,38 +164,43 @@ export function Shifts3() {
             ))}
           </div>
 
-          <div className={`day-boxes-container ${viewMode}`} style={{}}>
-            {dayBoxes.map((dayBox, i) => (
-              <div
-                className={`day-box ${i % 7 === 0 ? "left-side" : ""}`}
-                key={dayBox.id}
-                style={{ height: bandHeight * shiftBlueprints.length + topMargin }}
-              >
-                {localeFormat(dayBox.date, "dd MMM")}
-              </div>
-            ))}
-          </div>
-
           <div
             className="slots-container"
             style={
               {
+                // height: `calc(86% - var(--header-height))`,
+                // height: `calc(120% + calc(var(--header-height) + ${topMargin}px)))`,
+                // height: `calc(100% - var(--header-height))`,
+                overflowY: viewMode === "month" ? "auto" : "hidden",
                 "--slots-container-width": `calc(100% - ${sidebarOpen ? `var(--sidebar-width-open)` : `var(--sidebar-width-closed)`})`,
               } as React.CSSProperties
             }
           >
-            <div className="slots-wrapper" style={{ top: topMargin }}>
-              {shifts.map((shift) =>
-                shift.slots.map((slot) => (
+            <>
+              <div className={`day-boxes-container ${viewMode}`} style={{}}>
+                {dayBoxes.map((dayBox, i) => (
                   <div
-                    key={slot.id}
-                    className="slot"
-                    style={{ left: slot.x, top: slot.y, width: slot.width, height: bandHeight }}
-                    onMouseEnter={() => console.log(slot)}
-                  ></div>
-                )),
-              )}
-            </div>
+                    className={`day-box ${i % 7 === 0 ? "left-side" : ""}`}
+                    key={dayBox.id}
+                    style={{ height: bandHeight * shiftBlueprints.length + topMargin }}
+                  >
+                    {localeFormat(dayBox.date, "dd MMM")}
+                  </div>
+                ))}
+              </div>
+              <div className="slots-wrapper" style={{ top: topMargin }}>
+                {shifts.map((shift) =>
+                  shift.slots.map((slot) => (
+                    <div
+                      key={slot.id}
+                      className="slot"
+                      style={{ left: slot.x, top: slot.y, width: slot.width, height: bandHeight }}
+                      onMouseEnter={() => console.log(slot)}
+                    ></div>
+                  )),
+                )}
+              </div>
+            </>
           </div>
         </div>
 
