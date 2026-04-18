@@ -1,78 +1,28 @@
-import { add, endOfDay, endOfMonth, endOfWeek, isAfter, isBefore, isEqual, startOfMonth, startOfWeek } from "date-fns";
+import { add, endOfDay, endOfMonth, endOfWeek, startOfMonth, startOfWeek } from "date-fns";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useContainerWidth } from "react-grid-layout";
 import {
   buildDayBoxesArray,
+  buildSlotsBand,
   buildTimeRuler,
   getPxPerHour,
-  idMaker,
+  getPxPerMinute,
+  getSlotHeight,
+  getSlotPosition,
   localeFormat,
   professionals,
   shiftBlueprints,
+  topMargin,
   weekStartsOn,
-  type ShiftBlueprint,
-  type Slot,
   type ViewMode,
 } from "./shift.constants";
 import "./Shifts3.css";
-
-function buildSlotsRow(
-  shift: ShiftBlueprint,
-  calendarStartDate: Date,
-  calendarEndDate: Date,
-  dayBoxCount: number,
-): Slot[] {
-  // const { profession, startDate, workHours } = shBp;
-
-  const rows = dayBoxCount / 7;
-
-  const firstSlotStart = isBefore(shift.startDate, calendarStartDate)
-    ? calendarStartDate
-    : isBefore(shift.startDate, calendarEndDate)
-      ? shift.startDate
-      : null;
-
-  const lastSlotEnd = isBefore(shift.startDate, calendarEndDate) ? calendarEndDate : null;
-
-  //   console.log({ firstSlotStart, lastSlotEnd, rows });
-
-  if (!firstSlotStart || !lastSlotEnd) return [];
-
-  const firstSlotEnd = add(firstSlotStart, { hours: shift.workHours });
-
-  const slots: Slot[] = [];
-
-  let slotStart = firstSlotStart;
-  let slotEnd = firstSlotEnd;
-
-  while (isBefore(slotStart, calendarEndDate)) {
-    if (!isEqual(slotStart, slotEnd)) {
-      slots.push({
-        id: idMaker(),
-        color: shift.color,
-        start: slotStart,
-        end: slotEnd,
-        // x
-        // y
-        // width
-      });
-    }
-
-    slotStart = slotEnd;
-    slotEnd = add(slotStart, { hours: shift.workHours });
-    // if (isAfter(slotEnd, lastSlotEnd)) {
-    //   slotEnd = lastSlotEnd;
-    // }
-  }
-
-  return slots;
-}
 
 export function Shifts3() {
   const { containerRef, width: containerWidth } = useContainerWidth();
   //   const isSmallScreen = containerWidth <= 768;
 
-  const [globalDate, setGlobalDate] = useState(new Date(2026, 2, 31));
+  const [globalDate, setGlobalDate] = useState(new Date(2026, 4, 31));
   const [viewMode, setViewMode] = useState<ViewMode>((localStorage.getItem("viewMode") as ViewMode) || "day");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const dayColumns = viewMode === "day" ? 1 : 7;
@@ -82,13 +32,14 @@ export function Shifts3() {
   const endMonth = endOfMonth(globalDate);
   const startWeek = startOfWeek(globalDate, { weekStartsOn });
   const endWeek = endOfWeek(globalDate, { weekStartsOn });
-  const calendarStartDate = viewMode === "day" ? globalDate : viewMode === "week" ? startWeek : startMonth;
+  const calendarStartDate = viewMode === "day" ? globalDate : viewMode === "week" ? startWeek : startOfWeek(startMonth);
   const calendarEndDate =
     viewMode === "day"
       ? endOfDay(calendarStartDate)
       : viewMode === "week"
         ? endOfWeek(calendarStartDate)
-        : endOfWeek(endOfMonth(calendarStartDate));
+        : endOfWeek(endMonth);
+  const bandHeight = getSlotHeight(viewMode);
   const timeRuler = buildTimeRuler(calendarStartDate, pxPerHour, dayColumns);
 
   const opts = {
@@ -127,7 +78,39 @@ export function Shifts3() {
     setViewMode(selectedMode);
   }
 
-  console.log(buildSlotsRow(shiftBlueprints[2], calendarStartDate, calendarEndDate, dayBoxes.length));
+  // const slotsBand = buildSlotsBand(shiftBlueprints[3], calendarStartDate, calendarEndDate, viewMode);
+  // const slots = slotsBand.map((slot) => ({
+  //   ...slot,
+  //   ...getSlotPosition(
+  //     slot,
+  //     calendarStartDate,
+  //     calendarEndDate,
+  //     getPxPerMinute(containerWidth, dayColumns),
+  //     containerWidth,
+  //     42,
+  //     viewMode,
+  //   ),
+  // }));
+
+  const shifts = shiftBlueprints.map((shift, i) => ({
+    ...shift,
+    slots: buildSlotsBand(shift, calendarStartDate, calendarEndDate, viewMode).map((slot) => ({
+      ...slot,
+      ...getSlotPosition(
+        slot,
+        calendarStartDate,
+        calendarEndDate,
+        getPxPerMinute(containerWidth, dayColumns),
+        containerWidth,
+        bandHeight,
+        i,
+        shiftBlueprints.length,
+        viewMode,
+      ),
+    })),
+  }));
+
+  // console.log({ slots });
 
   return (
     <div className="shifts-3">
@@ -181,9 +164,13 @@ export function Shifts3() {
             ))}
           </div>
 
-          <div className={`day-boxes-container ${viewMode}`}>
+          <div className={`day-boxes-container ${viewMode}`} style={{}}>
             {dayBoxes.map((dayBox, i) => (
-              <div className={`day-box ${i % 7 === 0 ? "left-side" : ""}`} key={dayBox.id}>
+              <div
+                className={`day-box ${i % 7 === 0 ? "left-side" : ""}`}
+                key={dayBox.id}
+                style={{ height: bandHeight * shiftBlueprints.length + topMargin }}
+              >
                 {localeFormat(dayBox.date, "dd MMM")}
               </div>
             ))}
@@ -196,27 +183,42 @@ export function Shifts3() {
                 "--slots-container-width": `calc(100% - ${sidebarOpen ? `var(--sidebar-width-open)` : `var(--sidebar-width-closed)`})`,
               } as React.CSSProperties
             }
-          ></div>
+          >
+            <div className="slots-wrapper" style={{ top: topMargin }}>
+              {shifts.map((shift) =>
+                shift.slots.map((slot) => (
+                  <div
+                    key={slot.id}
+                    className="slot"
+                    style={{ left: slot.x, top: slot.y, width: slot.width, height: bandHeight }}
+                    onMouseEnter={() => console.log(slot)}
+                  ></div>
+                )),
+              )}
+            </div>
+          </div>
         </div>
 
-        <div
-          className="professionals-container mobile"
-          style={{
-            height: sidebarOpen ? "var(--mobile-bottom-height-open)" : "var(--mobile-bottom-height-closed)",
-            width: "100%",
-          }}
-        >
-          <div className="flex justify-between">
-            <div>Professionals</div>
-            <button onClick={() => setSidebarOpen((prev) => !prev)}>x</button>
-          </div>
-          {sidebarOpen &&
-            professionals.map((prof) => (
-              <div key={prof.id} className="professional-card" onClick={() => console.log(prof)}>
-                {prof.name} :: {prof.profession}
-              </div>
-            ))}
-        </div>
+        {/* 
+          <div
+            className="professionals-container mobile"
+            style={{
+              height: sidebarOpen ? "var(--mobile-bottom-height-open)" : "var(--mobile-bottom-height-closed)",
+              width: "100%",
+            }}
+          >
+            <div className="flex justify-between">
+              <div>Professionals</div>
+              <button onClick={() => setSidebarOpen((prev) => !prev)}>x</button>
+            </div>
+            {sidebarOpen &&
+              professionals.map((prof) => (
+                <div key={prof.id} className="professional-card" onClick={() => console.log(prof)}>
+                  {prof.name} :: {prof.profession}
+                </div>
+              ))}
+          </div> 
+        */}
       </div>
     </div>
   );

@@ -1,6 +1,18 @@
 import { ptBR } from "date-fns/locale/pt-BR";
 
-import { add, format } from "date-fns";
+import {
+  add,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInWeeks,
+  endOfWeek,
+  format,
+  isAfter,
+  isBefore,
+  isSameWeek,
+  startOfDay,
+  startOfWeek,
+} from "date-fns";
 
 export type ViewMode = "month" | "week" | "day";
 
@@ -18,14 +30,13 @@ export type ShiftBlueprint = {
   workHours: number;
   restHours: number;
   startDate: Date;
-  color: string;
 };
 
 export type Slot = {
   id: string;
   start: Date;
   end: Date;
-  color: string;
+  isPartial?: boolean;
 };
 
 export type Tick = {
@@ -40,7 +51,12 @@ export type DayBox = {
 };
 
 export const weekStartsOn = 0; // 0 - sun, 1 - mon, 3 - tue, ...
-export const margin = 16;
+export const topMargin = 40;
+
+export const getSlotHeight = (viewMode: ViewMode) => {
+  if (viewMode === "month") return 40;
+  return 120;
+};
 
 // export const sidebarSize = {
 //   desktop: { open: 320, closed: 60 },
@@ -61,44 +77,39 @@ export const professionals: Professional[] = [
 
 export const shiftBlueprints: ShiftBlueprint[] = [
   {
-    id: "sh-12x36",
+    id: "sh-12x144",
     profession: "doctor",
-    workHours: 12,
+    workHours: 24,
     restHours: 36,
     startDate: new Date(new Date().setHours(7, 0, 0, 0)),
-    color: "steelblue",
   },
   {
     id: "sh-8x16",
     profession: "nurse",
     workHours: 8,
     restHours: 16,
-    startDate: new Date(new Date().setHours(7, 0, 0, 0)),
-    color: "seagreen",
+    startDate: new Date(new Date().setHours(6, 0, 0, 0)),
   },
   {
     id: "sh-8x16-b",
     profession: "nurse",
     workHours: 8,
-    restHours: 16,
+    restHours: 25,
     startDate: new Date(new Date().setHours(15, 0, 0, 0)),
-    color: "seagreen",
   },
   {
     id: "sh-8x16-c",
     profession: "nurse",
     workHours: 8,
     restHours: 16,
-    startDate: new Date(new Date().setHours(23, 0, 0, 0)),
-    color: "seagreen",
+    startDate: new Date(new Date().setHours(12, 0, 0, 0)),
   },
   {
     id: "sh-6x12",
     profession: "technician",
-    workHours: 6,
+    workHours: 8,
     restHours: 12,
-    startDate: new Date(new Date().setHours(7, 0, 0, 0)),
-    color: "slategray",
+    startDate: new Date(new Date().setHours(2, 0, 0, 0)),
   },
 ];
 
@@ -179,4 +190,123 @@ export function buildTimeRuler(startDate: Date, pxPerHour: number, days: number)
     });
 
   return ticks;
+}
+
+export function buildSlotsBand(
+  shift: ShiftBlueprint,
+  calendarStartDate: Date,
+  calendarEndDate: Date,
+  viewMode: ViewMode,
+): Slot[] {
+  let slotStart = null;
+  let slotEnd = null;
+
+  if (isAfter(shift.startDate, calendarEndDate)) return [];
+
+  if (isAfter(shift.startDate, calendarStartDate) && isBefore(shift.startDate, calendarEndDate)) {
+    slotStart = shift.startDate;
+    slotEnd = add(shift.startDate, { hours: shift.workHours });
+  } else {
+    const shiftStartHour = shift.startDate.getHours();
+    let fShStart = shiftStartHour;
+    let fShEnd = shiftStartHour + shift.workHours;
+
+    while (fShEnd < 24) {
+      fShStart += shift.workHours;
+      fShEnd += shift.workHours;
+    }
+    // fShEnd %= 24;
+
+    const dayBeforeFirstCalendarDate = startOfDay(add(calendarStartDate, { days: -1 }));
+    slotStart = new Date(new Date(dayBeforeFirstCalendarDate).setHours(fShStart));
+    slotEnd = add(slotStart, { hours: shift.workHours });
+  }
+
+  const slots = [];
+
+  if (viewMode === "month") {
+    while (isBefore(slotStart, calendarEndDate)) {
+      if (isSameWeek(slotStart, slotEnd)) {
+        slots.push({
+          id: idMaker(),
+          start: slotStart,
+          end: slotEnd,
+          isPartial: false,
+        });
+      } else {
+        const id = idMaker();
+
+        slots.push({
+          id: `${id}-start`,
+          start: slotStart,
+          end: add(endOfWeek(slotStart), { seconds: 1 }),
+          isPartial: true,
+        });
+        slots.push({
+          id: `${id}-end`,
+          start: startOfWeek(slotEnd),
+          end: slotEnd,
+          isPartial: true,
+        });
+      }
+
+      slotStart = slotEnd;
+      slotEnd = add(slotEnd, { hours: shift.workHours });
+    }
+  } else {
+    while (isBefore(slotStart, calendarEndDate)) {
+      const isPartial = isBefore(slotStart, calendarStartDate) || isAfter(slotEnd, calendarEndDate);
+      const _id = idMaker();
+      const id = isPartial ? (isBefore(slotStart, calendarStartDate) ? `${_id}-start` : `${_id}-end`) : _id;
+
+      slots.push({
+        id,
+        start: slotStart,
+        end: slotEnd,
+        isPartial,
+      });
+
+      slotStart = slotEnd;
+      slotEnd = add(slotEnd, { hours: shift.workHours });
+    }
+  }
+
+  return slots;
+}
+
+export function getSlotPosition(
+  slot: Slot,
+  calendarStartDate: Date,
+  calendarEndDate: Date,
+  pxPerMinute: number,
+  containerWidth: number,
+  bandHeight: number,
+  bandIndex: number,
+  bandCount: number,
+  viewMode: ViewMode,
+) {
+  const slotStart = isBefore(slot.start, calendarStartDate) ? calendarStartDate : slot.start;
+  const minutesFromCalendarStart = differenceInMinutes(slotStart, calendarStartDate);
+  let x = minutesFromCalendarStart * pxPerMinute;
+
+  let y = bandHeight * bandIndex;
+  if (viewMode === "month") {
+    const boxHeight = bandCount * bandHeight;
+    const level = differenceInWeeks(slot.start, calendarStartDate);
+    x -= containerWidth * level;
+    y += level * boxHeight + level * topMargin;
+  }
+
+  let slotDurationInMinutes = differenceInHours(slot.end, slot.start) * 60;
+  // differenceInHours(slot.end, slot.start) * 60 + slot.end.getMinutes() - slot.start.getMinutes();
+
+  if (isBefore(slot.start, calendarStartDate)) {
+    slotDurationInMinutes -= differenceInHours(calendarStartDate, slot.start) * 60;
+  }
+  if (isAfter(slot.end, calendarEndDate)) {
+    slotDurationInMinutes -= differenceInHours(slot.end, calendarEndDate) * 60;
+  }
+  const width = slotDurationInMinutes * pxPerMinute;
+
+  return { x, y, width };
 }
